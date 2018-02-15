@@ -1,0 +1,127 @@
+
+```{r}
+dataLink='https://raw.githubusercontent.com/awood59/data/gh-pages/SchoolFinanceEdit.csv'
+```
+
+```{r}
+theData=read.csv(dataLink,stringsAsFactors = F,strip.white = T)
+```
+
+```{r}
+names(theData)
+```
+
+```{r}
+table(theData$STATE)
+```
+
+```{r}
+WAData=theData[theData$STATE=='Washington',]
+row.names(WAData)=NULL
+```
+
+
+```{r}
+WAData$NAME
+```
+
+```{r}
+library(stringr)
+
+(WAData$NAMEbad=unlist(lapply(WAData$NAME,word,-1)))
+
+```
+
+
+```{r}
+WAData$NAMEOK=NA
+for (pos in 1:nrow(WAData)){
+    if(WAData$NAMEbad[pos]!="DISTRICT"){
+    cleanValue=sub(WAData$NAMEbad[pos],'',WAData$NAME[pos])
+    WAData$NAMEOK[pos]=trimws(cleanValue)
+    }else{WAData$NAMEOK[pos]=WAData$NAME[pos]}
+}
+```
+
+```{r}
+table(unlist(lapply(WAData$NAMEOK,word,-1)))
+```
+
+```{r}
+WAData[word(WAData$NAMEOK,-1)=='DIST',]
+```
+
+```{r}
+WAData$NAMEbad=unlist(lapply(WAData$NAMEOK,word,-1))
+```
+
+
+```{r}
+for (pos in 1:nrow(WAData)){
+    if (WAData$NAMEbad[pos]=='DIST'){
+        cleanValue=sub("DIST",'DISTRICT',WAData$NAMEOK[pos])
+        WAData$NAMEOK[pos]=trimws(cleanValue)
+        }
+}
+```
+
+
+```{r}
+table(unlist(lapply(WAData$NAMEOK,word,-1)))
+```
+
+
+
+```{r}
+(lastBad=names(table(unlist(lapply(WAData$NAMEOK,word,-1))))[-c(4,5)])
+```
+
+
+
+
+```{r}
+for (pos in 1:nrow(WAData)){
+    if (WAData$NAMEbad[pos]%in% lastBad){
+        cleanValue=sub(WAData$NAMEbad[pos],'',WAData$NAMEOK[pos])
+        WAData$NAMEOK[pos]=trimws(cleanValue)
+        }
+}
+
+```
+
+```{r}
+table(unlist(lapply(WAData$NAMEOK,word,-1)))
+```
+```{r}
+WAData[word(WAData$NAMEOK,-1)=='C',]
+```
+
+```{r}
+WAData[word(WAData$NAMEOK,-1)=='C',]$NAMEOK='BREMERTON SCHOOL DISTRICT'
+```
+
+
+```{r}
+table(unlist(lapply(WAData$NAMEOK,word,-1)))
+```
+
+```{r}
+length(WAData$NAMEOK)
+```
+
+```{r}
+length(unique(WAData$NAMEOK))
+```
+
+```{r}
+names(WAData)
+```
+
+```{r, eval=FALSE}
+numericColumns =names(WAData)[4:14]
+aggregateBY='NAMEOK'
+(cleanWA=aggregate(WAData[,numericColumns], by=list(WAData[,aggregateBY]), sum ))
+```
+
+
+
